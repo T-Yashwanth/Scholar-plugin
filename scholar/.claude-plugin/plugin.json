@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "scholar",
+  "displayName": "Scholar - APA Academic Writer",
+  "version": "1.0.0",
+  "description": "Academic writing assistant for DBA coursework: essays, discussion posts, peer replies. APA 7, multi-course, multi-variant, with strict verification before any draft is shown.",
+  "author": {
+    "name": "Yashwanth"
+  },
+  "license": "MIT",
+  "keywords": ["academic", "apa", "dba", "writing", "coursework"]
+}

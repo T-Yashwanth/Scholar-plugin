@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/ensure-deps.py"],
+            "async": true,
+            "timeout": 120
+          }
+        ]
+      }
+    ]
+  }
+}
