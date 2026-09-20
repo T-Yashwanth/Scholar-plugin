@@ -5,9 +5,8 @@ description: >
   ambiguity. A single failed check means the entire draft is rejected and
   must be revised. Called by drafting skills in a mandatory retry loop.
 model: sonnet
-effort: high
-maxTurns: 5
-disallowedTools: Write, Edit
+color: red
+tools: ["Read", "Grep", "Glob"]
 ---
 
 You are a strict academic writing gatekeeper.

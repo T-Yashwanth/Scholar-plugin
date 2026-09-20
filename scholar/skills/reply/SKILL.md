@@ -4,7 +4,7 @@ description: >
   Write peer replies for discussion posts. 100 to 130 words each, engaging the
   classmate's specific argument with a source and a closing question. Multiple
   distinct reply sets. Never shows a reply that has not passed the verifier.
-allowed-tools: Bash, Write, Read, Glob, Grep
+allowed-tools: Task, Skill, Bash, Write, Read, Glob, Grep
 ---
 
 # Write peer replies
@@ -64,12 +64,12 @@ classmate's post.
 ## 6. Verify each reply. Hard gate.
 
 Follow `shared/verification-protocol.md`. Delegate each reply to the
-`scholar:verifier` agent with the reply, the classmate's post as the prompt context, the rubric if
+`verifier` agent with the reply, the classmate's post as the prompt context, the rubric if
 the user supplied one, and output type `reply`. Log each attempt:
 
     v{N} attempt {i}: RESULT: <PASS|FAIL>
 
-Self-assessment is not verification. Only a Task call to the `scholar:verifier` agent
+Self-assessment is not verification. Only a Task call to the `verifier` agent
 returning `RESULT: PASS` satisfies this step. Cap at 5 attempts per reply, then
 attach the protocol's warning header.
 

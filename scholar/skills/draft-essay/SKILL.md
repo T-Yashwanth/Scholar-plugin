@@ -5,7 +5,7 @@ description: >
   distinct variants with different title pages. Never shows a draft that has
   not passed the verifier agent. Use for any assignment submitted as a Word
   document.
-allowed-tools: Bash, Write, Read, Edit, Glob, Grep
+allowed-tools: Task, Skill, Bash, Write, Read, Edit, Glob, Grep
 ---
 
 # Draft a writing assignment
@@ -92,13 +92,13 @@ no en dashes.
 
 Follow `shared/verification-protocol.md` exactly.
 
-For each version, loop: delegate to the `scholar:verifier` agent with the draft, the
+For each version, loop: delegate to the `verifier` agent with the draft, the
 complete prompt, the rubric, and output type `essay`. On FAIL, fix every
 listed issue and resubmit. Record one line per attempt:
 
     v{N} attempt {i}: RESULT: <PASS|FAIL>
 
-Self-assessment is not verification. Only a Task call to the `scholar:verifier` agent
+Self-assessment is not verification. Only a Task call to the `verifier` agent
 returning `RESULT: PASS` satisfies this step.
 
 Cap at 5 attempts. If a version still fails, attach the warning header from

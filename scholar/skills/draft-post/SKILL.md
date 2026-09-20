@@ -4,7 +4,7 @@ description: >
   Draft a discussion post in APA 7 format. 250 to 350 words, essay format,
   no title page. Multiple distinct versions. Never shows a draft that has not
   passed the verifier agent. Use for any discussion board assignment.
-allowed-tools: Bash, Write, Read, Edit, Glob, Grep
+allowed-tools: Task, Skill, Bash, Write, Read, Edit, Glob, Grep
 ---
 
 # Draft a discussion post
@@ -65,13 +65,13 @@ Then draft each version:
 
 ## 7. Verify each version. Hard gate.
 
-Follow `shared/verification-protocol.md`. Delegate to the `scholar:verifier` agent with
+Follow `shared/verification-protocol.md`. Delegate to the `verifier` agent with
 the draft, the complete prompt, the rubric, and output type `post`. On FAIL,
 fix every issue and resubmit. Log each attempt:
 
     v{N} attempt {i}: RESULT: <PASS|FAIL>
 
-Self-assessment is not verification. Only a Task call to the `scholar:verifier` agent
+Self-assessment is not verification. Only a Task call to the `verifier` agent
 returning `RESULT: PASS` satisfies this step. Cap at 5 attempts, then attach
 the protocol's warning header.
 

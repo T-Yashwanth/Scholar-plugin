@@ -20,7 +20,13 @@ reuses it across sessions.
 
 ## Quick start
 
-    claude --plugin-dir ./scholar        # development
+Install from the repo root, which doubles as a local marketplace:
+
+    /plugin marketplace add <path to scholar-plugin>
+    /plugin install scholar@scholar-plugin
+
+Then reload the window and use:
+
     /scholar:setup-course                # once per course
     /scholar:draft-post                  # paste prompt, rubric, readings
 
@@ -129,7 +135,7 @@ personal travels with it.
     ├── templates/{courses,feedback,knowledge,variants}.md
     └── README.md
 
-The three checks live only in `agents/verifier.md`, the one place they execute.
+The four checks live only in `agents/verifier.md`, the one place they execute.
 `shared/verification-protocol.md` owns the retry loop and restates no check
 content, so the two cannot drift apart.
 
@@ -140,5 +146,6 @@ stub, and `py` can resolve to a different installation than the one holding
 `python-docx`. `ensure-deps.py` installs into `sys.executable` so the package
 lands in the interpreter that actually runs the docx script.
 
-The SessionStart hook uses the exec form with an `args` array, so no shell is
-involved and it behaves the same on Windows, macOS, and Linux.
+The SessionStart hook passes the interpreter and script path in a single
+`command` string, the form Claude Code's hook schema supports, and quotes the
+`${CLAUDE_PLUGIN_ROOT}` path so it survives spaces on Windows.

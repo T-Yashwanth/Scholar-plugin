@@ -1,0 +1,15 @@
+{
+  "name": "scholar-plugin",
+  "version": "1.0.0",
+  "description": "Scholar: APA 7 academic writing assistant for DBA coursework",
+  "owner": {
+    "name": "Yashwanth"
+  },
+  "plugins": [
+    {
+      "name": "scholar",
+      "version": "1.0.0",
+      "source": "./scholar"
+    }
+  ]
+}

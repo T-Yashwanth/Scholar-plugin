@@ -1,13 +1,13 @@
 # Verification Protocol (caller side)
 
 This file defines the LOOP. It does not define the checks.
-The checks live in one place only: the `scholar:verifier` agent.
+The checks live in one place only: the `verifier` agent.
 Never restate check content here, and never self-assess against it.
 
 ## The loop
 
 1. Draft the output.
-2. Delegate to the `scholar:verifier` agent with all four inputs:
+2. Delegate to the `verifier` agent with all four inputs:
    - the draft
    - the original assignment prompt, complete, including every sub-question
    - the grading rubric
@@ -35,7 +35,7 @@ called for that attempt, which is a skipped gate.
   or the cap has been reached and the warning header is attached.
 - Do NOT skip verification to save time or tokens.
 - Self-assessment is not verification. "I checked it and it looks correct"
-  does not satisfy this protocol. Only a Task call to the `scholar:verifier` agent
+  does not satisfy this protocol. Only a Task call to the `verifier` agent
   returning `RESULT: PASS` satisfies it. The separation is the point:
   the verifier is adversarial and does not share the drafter's assumptions.
 
