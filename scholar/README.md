@@ -67,26 +67,35 @@ no middle option. It runs four checks:
 4. **Output type rules.** Word counts, essay format, title page accuracy, and
    for replies, that it engages the classmate's actual argument.
 
-A `FAIL` sends the draft back for revision and another check, up to 5 attempts.
-You are not shown a draft that has not passed. If a draft hits the cap, you get
-it with a warning header listing what is still unresolved, so nothing is lost
-and nothing is passed off as finished.
+Every version passes the verifier twice:
 
-One honest limit: this gate is instruction-level, not mechanically enforced.
-Chat text is not a tool call that a hook could intercept, so the protocol is
-reinforced in four places rather than being technically impossible to skip.
+    draft -> Gate 1 -> humanizer -> scan -> Gate 2 -> output
+
+**Gate 1** checks the content. A `FAIL` sends the draft back for revision
+and another check, up to 5 attempts. **Gate 2** runs the same four checks
+on the humanized text, so the rewrite cannot quietly cost rubric points,
+drop a sub-question, or break a citation. A Gate 2 `FAIL` gets small
+targeted fixes, not another humanizer pass, up to 3 attempts.
+
+You are not shown text that has not passed Gate 2. If a draft hits the
+Gate 1 cap, you get it with a warning header listing what is still
+unresolved. If it hits the Gate 2 cap, you get the Gate 1 version instead,
+which passed every check, with a one-line note that the humanizer pass was
+dropped for it. Nothing is lost and nothing is passed off as finished.
+
+One honest limit: these gates are instruction-level, not mechanically
+enforced. Chat text is not a tool call that a hook could intercept, so the
+protocol is reinforced in several places rather than being technically
+impossible to skip.
 
 ## AI-pattern cleanup
 
-After verification passes, the text goes through the `humanizer` plugin in its
-embedded mode, which returns only the finished text. The order matters: the
-humanizer restructures prose, so running it before verification would
-invalidate the APA check.
-
-It runs under two constraints Scholar adds: em dashes and en dashes are banned
-outright by the voice profile, and no citation, author, year, page number, or
-DOI may be added or changed. Because those edits happen after verification,
-they are not re-verified, so a fabricating humanizer would be uncaught.
+Between the gates, the text goes through the `humanizer` plugin in its
+embedded mode, which returns only the finished text. It runs under three
+constraints Scholar adds: em dashes and en dashes are banned outright by
+the voice profile; no citation, author, year, page number, or DOI may be
+added or changed; and every point that answers the prompt or meets a
+rubric criterion must survive. Gate 2 then confirms all of it held.
 
 ## Your data
 

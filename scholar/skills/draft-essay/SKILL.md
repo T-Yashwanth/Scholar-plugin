@@ -11,9 +11,11 @@ allowed-tools: Agent, Task, Skill, Bash, Write, Read, Edit, Glob, Grep
 # Draft a writing assignment
 
 **Do not show the user any draft until the verifier agent has returned
-`RESULT: PASS` for it.** No exceptions, no previews, no "here is a first pass
-while I check." The only case where unverified text reaches the user is the
-5-attempt cap in step 8, and it carries a warning header.
+`RESULT: PASS` for it twice: once before the humanizer (Gate 1, step 8)
+and once after it (Gate 2, step 10).** No previews, no "here is a first
+pass while I check." The only exceptions are the cap rules in
+`shared/verification-protocol.md`, which either attach a warning header or
+fall back to the Gate 1 text.
 
 ## 1. Read the reference files
 
@@ -96,50 +98,61 @@ work, citations woven in where they land, one specific AI/ML workplace
 observation, hard declarative closer, varied sentence length. No em dashes,
 no en dashes.
 
-## 8. Verify each version. Hard gate.
+## 8. Gate 1: verify each version. Hard gate.
 
-Follow `shared/verification-protocol.md` exactly.
+Follow `shared/verification-protocol.md` exactly. For each version, delegate
+to the `scholar:verifier` agent with the draft, the complete prompt, the rubric, and output type
+`essay`. On FAIL, fix every listed issue and resubmit. Log each attempt:
 
-For each version, loop: delegate to the `scholar:verifier` agent with the draft, the
-complete prompt, the rubric, and output type `essay`. On FAIL, fix every
-listed issue and resubmit. Record one line per attempt:
+    v{N} gate1 attempt {i}: RESULT: <PASS|FAIL>
 
-    v{N} attempt {i}: RESULT: <PASS|FAIL>
+Self-assessment is not verification. Only an Agent (Task) call to the
+`scholar:verifier` agent returning `RESULT: PASS` satisfies this step.
 
-Self-assessment is not verification. Only an Agent (Task) call to the `scholar:verifier` agent
-returning `RESULT: PASS` satisfies this step.
-
-Cap at 5 attempts. If a version still fails, attach the warning header from
-the protocol and list the unresolved issues. Never present capped output as
-finished.
+On PASS, keep an exact copy of the text. It is the verified fallback if
+Gate 2 cannot pass. Cap at 5 attempts; at the cap, follow the protocol's
+Gate 1 cap rule and skip steps 9 and 10.
 
 ## 9. Humanizer pass. Invisible.
 
-Only after `RESULT: PASS`. Order matters: the humanizer reshapes prose, and
-running it before verification would invalidate the APA check.
-
-Invoke the `humanizer:humanizer` skill in **embedded mode**, which returns only the final
-text. Pass these constraints with the text:
+Only after Gate 1 passes. Invoke the `humanizer:humanizer` skill in
+**embedded mode**, which returns only the final text. Pass these
+constraints with the text:
 
 - Em dashes and en dashes are banned outright. The voice profile is the
   governing writing sample and it forbids them. Do not preserve them.
 - Do not add or remove any citation, author name, year, page number, or DOI.
-  The text has already passed APA verification and its edits are not
-  re-verified.
+- Keep every point that answers the prompt and every point that meets a
+  rubric criterion. Change how things are said, not what is said.
 
-Then run the final scan from the protocol: zero U+2014, zero U+2013, and every
-citation identical to the verified version.
+Then run the protocol's scan: zero U+2014, zero U+2013, every citation
+identical to the Gate 1 text, and length still inside any word or page limit the prompt states.
 
-Do not show a before and after. Do not mention that the humanizer ran.
+If the `humanizer:humanizer` skill is unavailable, apply the voice profile's
+"What to avoid" list yourself, tell the user the humanizer pass was
+skipped, and still run step 10.
+
+## 10. Gate 2: verify again after the humanizer. Hard gate.
+
+The humanizer rewrote the text, so Gate 1's PASS no longer covers it. Send
+the humanized text to the `scholar:verifier` agent with the same inputs as
+step 8. Log each attempt:
+
+    v{N} gate2 attempt {i}: RESULT: <PASS|FAIL>
+
+On FAIL, make the smallest edits that fix every listed issue and keep the
+humanized wording everywhere else. Do not run the humanizer again. Cap at 3
+attempts; at the cap, follow the protocol's Gate 2 cap rule and output the
+Gate 1 fallback instead.
+
+Do not show a before and after. Do not mention the humanizer, except when
+a cap rule or an unavailable humanizer requires it.
 
 The dash ban covers everything you print, not only the body text. Labels,
-headers, word counts, and any commentary around the output must also be free
-of em and en dashes. Use a colon or a period instead.
+headers, word counts, and any commentary around the output must also be
+free of em and en dashes. Use a colon or a period instead.
 
-If the `humanizer:humanizer` skill is unavailable, apply the voice profile's "What to
-avoid" list yourself and tell the user the humanizer pass was skipped.
-
-## 10. Generate the .docx
+## 11. Generate the .docx
 
 See [reference.md](reference.md) for the command, the file formats, and the
 failure handling.

@@ -10,8 +10,11 @@ allowed-tools: Agent, Task, Skill, Bash, Write, Read, Glob, Grep
 # Write peer replies
 
 **Do not show the user any reply until the verifier agent has returned
-`RESULT: PASS` for it.** The only exception is the 5-attempt cap in step 6,
-which carries a warning header.
+`RESULT: PASS` for it twice: once before the humanizer (Gate 1, step 6)
+and once after it (Gate 2, step 8).** No previews, no "here is a first
+pass while I check." The only exceptions are the cap rules in
+`shared/verification-protocol.md`, which either attach a warning header or
+fall back to the Gate 1 text.
 
 ## 1. Read the reference files
 
@@ -61,40 +64,67 @@ Voice profile applies. No em dashes, no en dashes. No sycophantic opener
 ("Great post!"). Do not invent a source, a statistic, or a quotation from the
 classmate's post.
 
-## 6. Verify each reply. Hard gate.
+## 6. Gate 1: verify each reply. Hard gate.
 
-Follow `shared/verification-protocol.md`. Delegate each reply to the
-`scholar:verifier` agent with the reply, the classmate's post as the prompt context, the rubric if
-the user supplied one, and output type `reply`. Log each attempt:
+Follow `shared/verification-protocol.md` exactly. For each reply, delegate
+to the `scholar:verifier` agent with the reply, the classmate's post as the prompt context, the
+rubric if the user supplied one, and output type
+`reply`. On FAIL, fix every listed issue and resubmit. Log each attempt:
 
-    v{N} attempt {i}: RESULT: <PASS|FAIL>
-
-Self-assessment is not verification. Only an Agent (Task) call to the `scholar:verifier` agent
-returning `RESULT: PASS` satisfies this step. Cap at 5 attempts per reply, then
-attach the protocol's warning header.
+    v{N} gate1 attempt {i}: RESULT: <PASS|FAIL>
 
 If the user supplied no rubric, pass the words "no rubric supplied" as the
-rubric input. The verifier then skips CHECK 2 and runs checks 1, 3, and 4.
+rubric input, at both gates. The verifier then skips CHECK 2 and runs
+checks 1, 3, and 4.
+
+Self-assessment is not verification. Only an Agent (Task) call to the
+`scholar:verifier` agent returning `RESULT: PASS` satisfies this step.
+
+On PASS, keep an exact copy of the text. It is the verified fallback if
+Gate 2 cannot pass. Cap at 5 attempts; at the cap, follow the protocol's
+Gate 1 cap rule and skip steps 7 and 8.
 
 ## 7. Humanizer pass. Invisible.
 
-Only after `RESULT: PASS`. Invoke the `humanizer:humanizer` skill in **embedded mode**,
-passing these constraints:
+Only after Gate 1 passes. Invoke the `humanizer:humanizer` skill in
+**embedded mode**, which returns only the final text. Pass these
+constraints with the text:
 
-- Em and en dashes are banned by the governing voice profile.
-- Do not add or remove any citation, author, year, page number, or DOI.
+- Em dashes and en dashes are banned outright. The voice profile is the
+  governing writing sample and it forbids them. Do not preserve them.
+- Do not add or remove any citation, author name, year, page number, or DOI.
+- Keep every point that answers the prompt and every point that meets a
+  rubric criterion. Change how things are said, not what is said.
 
-Then scan: zero U+2014, zero U+2013, citations unchanged, and word count still
-inside 100 to 130. The window is narrow, so re-count after the rewrite and fix
-any drift.
+Then run the protocol's scan: zero U+2014, zero U+2013, every citation
+identical to the Gate 1 text, and word count still inside 100 to 130. The window is
+narrow, so re-count and fix any drift.
 
-Do not mention the humanizer.
+If the `humanizer:humanizer` skill is unavailable, apply the voice profile's
+"What to avoid" list yourself, tell the user the humanizer pass was
+skipped, and still run step 8.
+
+## 8. Gate 2: verify again after the humanizer. Hard gate.
+
+The humanizer rewrote the text, so Gate 1's PASS no longer covers it. Send
+the humanized text to the `scholar:verifier` agent with the same inputs as
+step 6. Log each attempt:
+
+    v{N} gate2 attempt {i}: RESULT: <PASS|FAIL>
+
+On FAIL, make the smallest edits that fix every listed issue and keep the
+humanized wording everywhere else. Do not run the humanizer again. Cap at 3
+attempts; at the cap, follow the protocol's Gate 2 cap rule and output the
+Gate 1 fallback instead.
+
+Do not show a before and after. Do not mention the humanizer, except when
+a cap rule or an unavailable humanizer requires it.
 
 The dash ban covers everything you print, not only the body text. Labels,
-headers, word counts, and any commentary around the output must also be free
-of em and en dashes. Use a colon or a period instead.
+headers, word counts, and any commentary around the output must also be
+free of em and en dashes. Use a colon or a period instead.
 
-## 8. Output
+## 9. Output
 
 Print the replies as formatted text in the chat, grouped by set and labeled
 with which classmate post each answers. State each word count.
