@@ -46,8 +46,10 @@ a PAGE field, references on a new page with 0.5 inch hanging indents.
 
 ## Failure handling
 
-Exit code 2 means python-docx is missing for that interpreter. Exit code 1
-means something else failed.
+Exit code 3 means python-docx is missing for that interpreter. Exit code 2
+means a required flag was missing, so fix the command rather than
+installing anything. Exit code 1 means something else failed; the stderr
+line says what.
 
 Do not discard the drafted text. The essay is the expensive part and the
 conversion is cheap and retryable. On any failure:
@@ -56,5 +58,6 @@ conversion is cheap and retryable. On any failure:
    `.docx` output path so nothing is lost.
 2. Tell the user the content is complete and verified, and that only the .docx
    conversion failed.
-3. Give them the exact fix: `python -m pip install python-docx`
+3. Give them the exact fix. For exit 3 that is
+   `python -m pip install python-docx`.
 4. Offer to retry the conversion once they have run it.

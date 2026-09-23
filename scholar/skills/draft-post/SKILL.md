@@ -4,7 +4,7 @@ description: >
   Draft a discussion post in APA 7 format. 250 to 350 words, essay format,
   no title page. Multiple distinct versions. Never shows a draft that has not
   passed the verifier agent. Use for any discussion board assignment.
-allowed-tools: Task, Skill, Bash, Write, Read, Edit, Glob, Grep
+allowed-tools: Agent, Task, Skill, Bash, Write, Read, Edit, Glob, Grep
 ---
 
 # Draft a discussion post
@@ -65,13 +65,13 @@ Then draft each version:
 
 ## 7. Verify each version. Hard gate.
 
-Follow `shared/verification-protocol.md`. Delegate to the `verifier` agent with
+Follow `shared/verification-protocol.md`. Delegate to the `scholar:verifier` agent with
 the draft, the complete prompt, the rubric, and output type `post`. On FAIL,
 fix every issue and resubmit. Log each attempt:
 
     v{N} attempt {i}: RESULT: <PASS|FAIL>
 
-Self-assessment is not verification. Only a Task call to the `verifier` agent
+Self-assessment is not verification. Only an Agent (Task) call to the `scholar:verifier` agent
 returning `RESULT: PASS` satisfies this step. Cap at 5 attempts, then attach
 the protocol's warning header.
 
@@ -80,7 +80,7 @@ the protocol's warning header.
 Only after `RESULT: PASS`, never before, since the humanizer reshapes prose
 that has already been APA verified.
 
-Invoke the `humanizer` skill in **embedded mode** (returns only final text),
+Invoke the `humanizer:humanizer` skill in **embedded mode** (returns only final text),
 passing these constraints:
 
 - Em and en dashes are banned. The voice profile governs and forbids them.
@@ -96,7 +96,7 @@ be free of em and en dashes. Use a colon or a period instead.
 
 Do not show a before and after. Do not mention the humanizer.
 
-If the `humanizer` skill is unavailable, apply the voice profile's "What to
+If the `humanizer:humanizer` skill is unavailable, apply the voice profile's "What to
 avoid" list yourself and say the pass was skipped.
 
 ## 9. Output

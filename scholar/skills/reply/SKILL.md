@@ -4,7 +4,7 @@ description: >
   Write peer replies for discussion posts. 100 to 130 words each, engaging the
   classmate's specific argument with a source and a closing question. Multiple
   distinct reply sets. Never shows a reply that has not passed the verifier.
-allowed-tools: Task, Skill, Bash, Write, Read, Glob, Grep
+allowed-tools: Agent, Task, Skill, Bash, Write, Read, Glob, Grep
 ---
 
 # Write peer replies
@@ -64,21 +64,21 @@ classmate's post.
 ## 6. Verify each reply. Hard gate.
 
 Follow `shared/verification-protocol.md`. Delegate each reply to the
-`verifier` agent with the reply, the classmate's post as the prompt context, the rubric if
+`scholar:verifier` agent with the reply, the classmate's post as the prompt context, the rubric if
 the user supplied one, and output type `reply`. Log each attempt:
 
     v{N} attempt {i}: RESULT: <PASS|FAIL>
 
-Self-assessment is not verification. Only a Task call to the `verifier` agent
+Self-assessment is not verification. Only an Agent (Task) call to the `scholar:verifier` agent
 returning `RESULT: PASS` satisfies this step. Cap at 5 attempts per reply, then
 attach the protocol's warning header.
 
-If the user supplied no rubric, tell the verifier so, and have it run checks
-1, 3, and 4 only.
+If the user supplied no rubric, pass the words "no rubric supplied" as the
+rubric input. The verifier then skips CHECK 2 and runs checks 1, 3, and 4.
 
 ## 7. Humanizer pass. Invisible.
 
-Only after `RESULT: PASS`. Invoke the `humanizer` skill in **embedded mode**,
+Only after `RESULT: PASS`. Invoke the `humanizer:humanizer` skill in **embedded mode**,
 passing these constraints:
 
 - Em and en dashes are banned by the governing voice profile.

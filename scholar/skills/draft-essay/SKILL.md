@@ -5,7 +5,7 @@ description: >
   distinct variants with different title pages. Never shows a draft that has
   not passed the verifier agent. Use for any assignment submitted as a Word
   document.
-allowed-tools: Task, Skill, Bash, Write, Read, Edit, Glob, Grep
+allowed-tools: Agent, Task, Skill, Bash, Write, Read, Edit, Glob, Grep
 ---
 
 # Draft a writing assignment
@@ -60,6 +60,14 @@ with author attributions, author positions, and usable citations in the form
 Read `scholar-data/{course}/variants.md`. Display the candidate names numbered.
 Ask: "Which variants? (for example '1 and 3' or 'all')"
 
+Then collect the two title page fields that belong to the assignment, not to
+a variant, so they are the same for every version:
+
+- **Paper title.** Use the title the prompt gives. If it gives none, propose
+  one in title case and confirm it with the user.
+- **Due date.** Ask for it, and write it out in full, for example
+  `September 20, 2026`. Do not guess or default to today.
+
 ## 6. Analyze the assignment
 
 Internal. Do not show this to the user.
@@ -92,13 +100,13 @@ no en dashes.
 
 Follow `shared/verification-protocol.md` exactly.
 
-For each version, loop: delegate to the `verifier` agent with the draft, the
+For each version, loop: delegate to the `scholar:verifier` agent with the draft, the
 complete prompt, the rubric, and output type `essay`. On FAIL, fix every
 listed issue and resubmit. Record one line per attempt:
 
     v{N} attempt {i}: RESULT: <PASS|FAIL>
 
-Self-assessment is not verification. Only a Task call to the `verifier` agent
+Self-assessment is not verification. Only an Agent (Task) call to the `scholar:verifier` agent
 returning `RESULT: PASS` satisfies this step.
 
 Cap at 5 attempts. If a version still fails, attach the warning header from
@@ -110,7 +118,7 @@ finished.
 Only after `RESULT: PASS`. Order matters: the humanizer reshapes prose, and
 running it before verification would invalidate the APA check.
 
-Invoke the `humanizer` skill in **embedded mode**, which returns only the final
+Invoke the `humanizer:humanizer` skill in **embedded mode**, which returns only the final
 text. Pass these constraints with the text:
 
 - Em dashes and en dashes are banned outright. The voice profile is the
@@ -128,7 +136,7 @@ The dash ban covers everything you print, not only the body text. Labels,
 headers, word counts, and any commentary around the output must also be free
 of em and en dashes. Use a colon or a period instead.
 
-If the `humanizer` skill is unavailable, apply the voice profile's "What to
+If the `humanizer:humanizer` skill is unavailable, apply the voice profile's "What to
 avoid" list yourself and tell the user the humanizer pass was skipped.
 
 ## 10. Generate the .docx
@@ -137,6 +145,8 @@ See [reference.md](reference.md) for the command, the file formats, and the
 failure handling.
 
 One file per version, named `{course}_{assignment-short-name}_v{N}.docx`.
-Title page fields come from the selected variant, verbatim.
+Title page fields: `--author`, `--school`, `--course`, and `--instructor`
+come from the selected variant, verbatim. `--title` and `--date` come from
+step 5 and are the same for every version.
 
 Report the output paths. State which variant each file belongs to.

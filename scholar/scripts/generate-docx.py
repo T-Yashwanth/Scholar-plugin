@@ -29,7 +29,8 @@ except ImportError:
         "generate-docx: python-docx is not installed for this interpreter.\n"
         "Fix: python -m pip install python-docx\n"
     )
-    sys.exit(2)
+    # 3, not 2: argparse already exits 2 for a missing flag.
+    sys.exit(3)
 
 FONT = "Times New Roman"
 
