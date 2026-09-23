@@ -1,15 +1,24 @@
 {
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "scholar-plugin",
-  "version": "1.0.0",
-  "description": "Scholar: APA 7 academic writing assistant for DBA coursework",
+  "description": "Scholar-plugin marketplace: the Scholar APA 7 academic writing assistant for DBA coursework",
   "owner": {
-    "name": "Yashwanth"
+    "name": "Yashwanth",
+    "url": "https://github.com/T-Yashwanth"
   },
   "plugins": [
     {
       "name": "scholar",
+      "description": "Drafts APA 7 essays (.docx), discussion posts, and peer replies. Every output passes a rubric, APA, and completeness check before and after the humanizer pass.",
       "version": "1.0.0",
-      "source": "./scholar"
+      "author": {
+        "name": "Yashwanth"
+      },
+      "source": "./scholar",
+      "category": "productivity",
+      "homepage": "https://github.com/T-Yashwanth/Scholar-plugin",
+      "repository": "https://github.com/T-Yashwanth/Scholar-plugin",
+      "keywords": ["academic", "apa", "dba", "writing", "coursework"]
     }
   ]
 }

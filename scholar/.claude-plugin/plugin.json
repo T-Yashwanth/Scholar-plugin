@@ -7,6 +7,14 @@
   "author": {
     "name": "Yashwanth"
   },
+  "homepage": "https://github.com/T-Yashwanth/Scholar-plugin",
+  "repository": "https://github.com/T-Yashwanth/Scholar-plugin",
   "license": "MIT",
-  "keywords": ["academic", "apa", "dba", "writing", "coursework"]
+  "keywords": [
+    "academic",
+    "apa",
+    "dba",
+    "writing",
+    "coursework"
+  ]
 }

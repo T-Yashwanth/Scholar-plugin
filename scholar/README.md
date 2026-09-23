@@ -20,10 +20,15 @@ reuses it across sessions.
 
 ## Quick start
 
-Install from the repo root, which doubles as a local marketplace:
+The [Scholar-plugin](https://github.com/T-Yashwanth/Scholar-plugin) repo is
+itself a marketplace named `scholar-plugin`. Add it straight from GitHub:
 
-    /plugin marketplace add <path to scholar-plugin>
+    /plugin marketplace add T-Yashwanth/Scholar-plugin
     /plugin install scholar@scholar-plugin
+
+For development, add your local clone instead, so edits apply on reload:
+
+    /plugin marketplace add <path to your Scholar-plugin clone>
 
 Then reload the window and use:
 
