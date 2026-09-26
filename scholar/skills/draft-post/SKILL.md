@@ -1,127 +1,76 @@
 ---
 name: draft-post
 description: >
-  Draft a discussion post in APA 7 format. 250 to 350 words, essay format,
-  no title page. Multiple distinct versions. Never shows a draft that has not
-  passed the verifier agent. Use for any discussion board assignment.
-allowed-tools: Agent, Task, Skill, Bash, Write, Read, Edit, Glob, Grep
+  Draft a discussion board post in APA 7 as copy-and-paste text. Answers
+  every part of the question, writes to the rubric, cites only the materials
+  provided in the chat, and produces exactly the number of versions asked
+  for. Every version is verified before and after the humanizer. Use for any
+  discussion post.
+allowed-tools: Agent, Task, Skill, Read, Glob, Grep
 ---
 
 # Draft a discussion post
 
 **Do not show the user any draft until the verifier agent has returned
-`RESULT: PASS` for it twice: once before the humanizer (Gate 1, step 7)
-and once after it (Gate 2, step 9).** No previews, no "here is a first
-pass while I check." The only exceptions are the cap rules in
-`shared/verification-protocol.md`, which either attach a warning header or
-fall back to the Gate 1 text.
+`RESULT: PASS` for it twice: once before the humanizer (Gate 1) and once
+after it (Gate 2).** No previews. The only exceptions are the cap rules in
+`shared/verification-protocol.md`.
 
 ## 1. Read the reference files
 
-- `${CLAUDE_PLUGIN_ROOT}/shared/voice-profile.md`
 - `${CLAUDE_PLUGIN_ROOT}/shared/apa7-rules.md`
 - `${CLAUDE_PLUGIN_ROOT}/shared/verification-protocol.md`
 
-If a path does not resolve, Glob for `**/shared/voice-profile.md`. Do not
-proceed without the voice profile.
+If a path does not resolve, Glob for `**/shared/verification-protocol.md`.
 
-## 2. Identify the course
+## 2. Collect the inputs from the chat
 
-Data root is `${CLAUDE_PROJECT_DIR}/scholar-data/`. If it does not exist,
-create it with `courses.md` from `${CLAUDE_PLUGIN_ROOT}/templates/courses.md`.
+Everything comes from this chat: earlier messages, pasted text, and uploaded
+files all count.
 
-Read `courses.md`. One active course: use it. Several: ask which. None: run the
-`setup-course` interview inline, then continue.
+- **Prompt:** the discussion question and every professor instruction.
+- **Rubric:** required. If none is in the chat, ask for it and wait. Do not
+  draft without it.
+- **Materials:** readings, transcripts, documents, and links for this
+  assignment.
+- **Version count:** write exactly the number the user asked for. If they
+  did not say, write one.
 
-## 3. Load course context
+## 3. Analyze
 
-Read `{course}/knowledge.md` and `{course}/feedback.md`. Every feedback entry
-is a hard constraint. Cross-course material only where it genuinely fits.
+Internal, not shown:
 
-## 4. Auto-save new knowledge
+- Every question and sub-question, and every professor instruction.
+- Every rubric criterion and its highest performance level.
+- The required length. Use the prompt's word count; if it states none,
+  use 250 to 350 words of body text.
+- Which provided sources support which point.
 
-If the pasted readings contain material not in `knowledge.md`, append it under
-a `## Unit N: {topic}` header before drafting.
+## 4. Draft each version
 
-## 5. Ask the version count
+- Answer every part of the question, written to the top rubric level.
+- Essay format. No title, no headings, no bullet or numbered lists, unless
+  the prompt requires them.
+- Cite only sources from the provided materials, in APA 7, with a reference
+  list at the end. Never invent a source, quote, page number, or DOI. If
+  the materials are not enough to answer a part, ask the user.
+- Natural academic tone. No em dashes and no en dashes.
+- **Versions 2 and later:** read the versions already written, then make
+  this one clearly different: a different angle, opening, structure, and
+  order of points, and different examples where the materials allow. It
+  must read like another student wrote it, not like a reworded copy.
 
-"How many distinct versions?" if the user did not say.
+## 5. Verify, humanize, verify
 
-## 6. Analyze and draft
+Follow `shared/verification-protocol.md` exactly, with output type `post`.
+Send the prompt, the rubric, the source materials, and the other finished
+versions. Gate 1, then the humanizer, then Gate 2.
 
-Internal analysis first, not shown: every question and sub-question, every
-rubric criterion and its top performance level, and every stated requirement.
-Ask for the rubric if it was not supplied.
+Do not show a before and after. Do not mention the humanizer, except when a
+cap rule or an unavailable humanizer requires it.
 
-Then draft each version:
+## 6. Output
 
-- 250 to 350 words of body text, excluding the reference list. Count it.
-- Essay format. No title. No headings. No bullet or numbered lists, unless the
-  prompt explicitly requires them.
-- Assign each version a different analogy domain from the voice profile before
-  writing, and give each a different angle and structure. Different versions
-  must not share a hook or an argument shape.
-- APA 7 in-text citations, with a reference list at the end.
-- Voice profile throughout. No em dashes, no en dashes.
-- No "In today's world" opener. No "In conclusion" closer. End on a hard
-  declarative line.
-
-## 7. Gate 1: verify each version. Hard gate.
-
-Follow `shared/verification-protocol.md` exactly. For each version, delegate
-to the `scholar:verifier` agent with the draft, the complete prompt, the rubric, and output type
-`post`. On FAIL, fix every listed issue and resubmit. Log each attempt:
-
-    v{N} gate1 attempt {i}: RESULT: <PASS|FAIL>
-
-Self-assessment is not verification. Only an Agent (Task) call to the
-`scholar:verifier` agent returning `RESULT: PASS` satisfies this step.
-
-On PASS, keep an exact copy of the text. It is the verified fallback if
-Gate 2 cannot pass. Cap at 5 attempts; at the cap, follow the protocol's
-Gate 1 cap rule and skip steps 8 and 9.
-
-## 8. Humanizer pass. Invisible.
-
-Only after Gate 1 passes. Invoke the `humanizer:humanizer` skill in
-**embedded mode**, which returns only the final text. Pass these
-constraints with the text:
-
-- Em dashes and en dashes are banned outright. The voice profile is the
-  governing writing sample and it forbids them. Do not preserve them.
-- Do not add or remove any citation, author name, year, page number, or DOI.
-- Keep every point that answers the prompt and every point that meets a
-  rubric criterion. Change how things are said, not what is said.
-
-Then run the protocol's scan: zero U+2014, zero U+2013, every citation
-identical to the Gate 1 text, and body word count still inside 250 to 350. The
-humanizer can shorten text, so re-count and fix any drift.
-
-If the `humanizer:humanizer` skill is unavailable, apply the voice profile's
-"What to avoid" list yourself, tell the user the humanizer pass was
-skipped, and still run step 9.
-
-## 9. Gate 2: verify again after the humanizer. Hard gate.
-
-The humanizer rewrote the text, so Gate 1's PASS no longer covers it. Send
-the humanized text to the `scholar:verifier` agent with the same inputs as
-step 7. Log each attempt:
-
-    v{N} gate2 attempt {i}: RESULT: <PASS|FAIL>
-
-On FAIL, make the smallest edits that fix every listed issue and keep the
-humanized wording everywhere else. Do not run the humanizer again. Cap at 3
-attempts; at the cap, follow the protocol's Gate 2 cap rule and output the
-Gate 1 fallback instead.
-
-Do not show a before and after. Do not mention the humanizer, except when
-a cap rule or an unavailable humanizer requires it.
-
-The dash ban covers everything you print, not only the body text. Labels,
-headers, word counts, and any commentary around the output must also be
-free of em and en dashes. Use a colon or a period instead.
-
-## 10. Output
-
-Print each version as formatted text in the chat, ready to paste into the LMS.
-No .docx. Label each version and state its body word count.
+Print each version as copy-and-paste text in the chat, labeled Version 1,
+Version 2, and so on, with its body word count. Exactly the number of
+versions requested.

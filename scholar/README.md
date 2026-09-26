@@ -1,165 +1,96 @@
 # Scholar
 
-Academic writing assistant for DBA coursework. Drafts APA 7 essays as .docx,
-discussion posts, and peer replies. Every output passes an adversarial verifier
-before you see it.
+Academic writing assistant for DBA coursework. Writes APA 7 papers as Word
+files, discussion posts, and replies to classmates. Every output is checked
+before and after the humanizer, and you only see work that passed.
 
-Built for a student carrying several courses at once, where each course has its
-own readings, its own instructor feedback, and several people submitting their
-own copy with their own title page. Scholar keeps that state per course and
-reuses it across sessions.
+Scholar keeps no files and no memory of its own. Everything comes from the
+chat you are in: the prompt, rubric, readings, title page details, and any
+feedback you paste. Use one chat per subject, or per person.
 
 ## Requirements
 
-- Python 3 on PATH as `python`. The plugin installs `python-docx` on first
-  session start.
-- The [`humanizer`](https://github.com/blader/humanizer) plugin. Scholar
-  delegates its AI-pattern cleanup to it rather than shipping a second copy.
-  Without it the drafting skills still work, and they will tell you the
-  humanizer pass was skipped.
+- Python 3 on PATH as `python`, with `python-docx` installed
+  (`python -m pip install python-docx`). Only papers need it.
+- The [`humanizer`](https://github.com/blader/humanizer) plugin. Without it
+  Scholar still works and tells you the humanizer pass was skipped.
 
-## Quick start
+## Install
 
 The [Scholar-plugin](https://github.com/T-Yashwanth/Scholar-plugin) repo is
-itself a marketplace named `scholar-plugin`. Add it straight from GitHub:
+itself a marketplace named `scholar-plugin`. In a terminal:
 
-    /plugin marketplace add T-Yashwanth/Scholar-plugin
-    /plugin install scholar@scholar-plugin
+    claude plugin marketplace add T-Yashwanth/Scholar-plugin
+    claude plugin install scholar@scholar-plugin
 
-For development, add your local clone instead, so edits apply on reload:
+Then reload Claude.
 
-    /plugin marketplace add <path to your Scholar-plugin clone>
+## How to use it
 
-Then reload the window and use:
+1. Start a chat for the subject. Give the title page details (name, school,
+   course, instructor) for each person early on if you will need papers.
+2. Paste or upload the prompt, the rubric, and the readings.
+3. Ask in plain words:
+   - "Write the paper, 3 variants" gives 3 Word files.
+   - "Write the discussion post" gives copy-and-paste text.
+   - "Write me 2 replies" (with classmates' posts pasted) gives 2 replies.
+4. Claude asks only for what is missing, such as the rubric or the due date.
 
-    /scholar:setup-course                # once per course
-    /scholar:draft-post                  # paste prompt, rubric, readings
-
-## Skills
-
-| Skill | Use it for | Input | Output |
+| Skill | For | Needs | Gives |
 |---|---|---|---|
-| `/scholar:setup-course` | Starting a course | Course code, name, variant details | `scholar-data/{COURSE}/` with 3 files |
-| `/scholar:draft-essay` | Assignments submitted as Word files | Prompt, rubric, readings | One .docx per variant, APA 7 title page |
-| `/scholar:draft-post` | Discussion board posts | Prompt, rubric, readings | 250 to 350 word posts as chat text |
-| `/scholar:reply` | Peer replies | Classmate posts | 100 to 130 word replies as chat text |
-| `/scholar:save-unit` | Pre-loading readings | Unit material | Appended to `knowledge.md` |
-| `/scholar:save-feedback` | Graded work returned | Instructor comments | Appended to `feedback.md` |
+| `draft-essay` | Papers | Prompt, rubric, readings, title page details | One .docx per variant |
+| `draft-post` | Discussion posts | Prompt, rubric, readings | Copy-and-paste text |
+| `reply` | Replies to classmates | Classmates' posts | Exactly N replies |
 
-Standalone AI-pattern cleanup is `/humanizer`, from the humanizer plugin.
+## Rules it follows
 
-## Typical semester
+- **Every part answered.** Each question, sub-question, and professor
+  instruction is treated as a checklist item.
+- **Rubric.** Required for papers and posts. Every criterion must be met at
+  its highest level.
+- **Length.** The professor's word count. Defaults only when the prompt
+  gives none: posts 250 to 350 words, replies 100 to 130.
+- **Sources.** Only the materials you provided in the chat. Nothing is
+  invented; the checker confirms each citation against your materials.
+- **Exact counts.** 3 variants means 3. 2 replies means 2.
+- **Variants.** Each one is written to read like a different student:
+  different angle, opening, structure, and order of points.
+- **Replies.** Start with the student's full name and a comma, engage that
+  student's actual points, professional tone. No citation or closing
+  question unless the professor requires one. If you paste more posts than
+  replies requested, Claude picks the posts with the most substance and
+  says which.
+- **No em dashes or en dashes** anywhere.
 
-1. Start of term: `/scholar:setup-course` for each course.
-2. Each unit: paste readings, prompt, and rubric, then `/scholar:draft-essay`
-   or `/scholar:draft-post`.
-3. After classmates post: paste their posts, then `/scholar:reply`.
-4. When grades return: paste the feedback, then `/scholar:save-feedback`.
-   Every later draft for that course treats it as a constraint.
-5. Between assignments: `/scholar:save-unit` to bulk-load readings.
+## Checking
 
-## Verification
+    draft -> Check 1 -> humanizer -> Check 2 -> output
 
-Each draft goes to the `verifier` subagent, which returns `PASS` or `FAIL` with
-no middle option. It runs four checks:
+The `verifier` agent checks each draft and answers PASS or FAIL:
 
-1. **Prompt completeness.** Every question and sub-question is answered, and
-   every explicit instruction followed.
-2. **Rubric alignment.** Every criterion is met at its *highest* performance
-   level, not merely adequately.
-3. **APA 7 correctness.** Citations match references both ways, formatting is
-   right, and nothing is fabricated.
-4. **Output type rules.** Word counts, essay format, title page accuracy, and
-   for replies, that it engages the classmate's actual argument.
+1. Every part of the question answered and every instruction followed.
+2. Every rubric criterion at its highest level (skipped for replies).
+3. APA 7 citations and references correct, and every source found in your
+   materials.
+4. Length, format, and title page right, and not a copy of another version.
 
-Every version passes the verifier twice:
+Check 1 allows 5 attempts. Check 2 runs the same checks on the humanized
+text and allows 3 attempts, using small fixes only. If Check 1 still fails,
+you get the draft with a warning listing what is wrong. If Check 2 still
+fails, you get the Check 1 version, which passed, marked as not humanized.
 
-    draft -> Gate 1 -> humanizer -> scan -> Gate 2 -> output
+These checks are instructions to Claude, not code that forces them.
 
-**Gate 1** checks the content. A `FAIL` sends the draft back for revision
-and another check, up to 5 attempts. **Gate 2** runs the same four checks
-on the humanized text, so the rewrite cannot quietly cost rubric points,
-drop a sub-question, or break a citation. A Gate 2 `FAIL` gets small
-targeted fixes, not another humanizer pass, up to 3 attempts.
-
-You are not shown text that has not passed Gate 2. If a draft hits the
-Gate 1 cap, you get it with a warning header listing what is still
-unresolved. If it hits the Gate 2 cap, you get the Gate 1 version instead,
-which passed every check, with a one-line note that the humanizer pass was
-dropped for it. Nothing is lost and nothing is passed off as finished.
-
-One honest limit: these gates are instruction-level, not mechanically
-enforced. Chat text is not a tool call that a hook could intercept, so the
-protocol is reinforced in several places rather than being technically
-impossible to skip.
-
-## AI-pattern cleanup
-
-Between the gates, the text goes through the `humanizer` plugin in its
-embedded mode, which returns only the finished text. It runs under three
-constraints Scholar adds: em dashes and en dashes are banned outright by
-the voice profile; no citation, author, year, page number, or DOI may be
-added or changed; and every point that answers the prompt or meets a
-rubric criterion must survive. Gate 2 then confirms all of it held.
-
-## Your data
-
-Course data lives in your project, not in the plugin:
-
-    scholar-data/
-    ├── courses.md              # course registry
-    └── {COURSE}/
-        ├── variants.md         # title page configs, one block per person
-        ├── knowledge.md        # accumulated readings and usable citations
-        └── feedback.md         # instructor feedback, as hard constraints
-
-**Add `scholar-data/` to your `.gitignore`.** It holds real names, instructor
-names, and coursework. The plugin ships placeholder templates only, so nothing
-personal travels with it.
-
-## Architecture
-
-| Component | Count | Location |
-|---|---|---|
-| Skills | 6 | `skills/*/SKILL.md` |
-| Agent | 1 | `agents/verifier.md` |
-| Shared references | 3 | `shared/*.md` |
-| Data templates | 4 | `templates/*.md` |
-| Hook | 1 | `hooks/hooks.json` |
-| Scripts | 2 | `scripts/*.py` |
+## Files
 
     scholar/
     ├── .claude-plugin/plugin.json
-    ├── agents/verifier.md
-    ├── hooks/hooks.json
-    ├── scripts/
-    │   ├── ensure-deps.py          # installs python-docx into this interpreter
-    │   └── generate-docx.py        # APA 7 .docx writer
+    ├── agents/verifier.md               the checker
+    ├── scripts/generate-docx.py         APA 7 Word file writer
     ├── shared/
     │   ├── apa7-rules.md
-    │   ├── verification-protocol.md
-    │   └── voice-profile.md
-    ├── skills/
-    │   ├── draft-essay/{SKILL.md,reference.md}
-    │   ├── draft-post/SKILL.md
-    │   ├── reply/SKILL.md
-    │   ├── save-feedback/SKILL.md
-    │   ├── save-unit/SKILL.md
-    │   └── setup-course/SKILL.md
-    ├── templates/{courses,feedback,knowledge,variants}.md
-    └── README.md
-
-The four checks live only in `agents/verifier.md`, the one place they execute.
-`shared/verification-protocol.md` owns the retry loop and restates no check
-content, so the two cannot drift apart.
-
-## Notes on portability
-
-`python`, not `python3` or `py`. On Windows `python3` is often a Microsoft Store
-stub, and `py` can resolve to a different installation than the one holding
-`python-docx`. `ensure-deps.py` installs into `sys.executable` so the package
-lands in the interpreter that actually runs the docx script.
-
-The SessionStart hook passes the interpreter and script path in a single
-`command` string, the form Claude Code's hook schema supports, and quotes the
-`${CLAUDE_PLUGIN_ROOT}` path so it survives spaces on Windows.
+    │   └── verification-protocol.md     the check, humanize, check order
+    └── skills/
+        ├── draft-essay/{SKILL.md,reference.md}
+        ├── draft-post/SKILL.md
+        └── reply/SKILL.md

@@ -2,8 +2,8 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "scholar",
   "displayName": "Scholar - APA Academic Writer",
-  "version": "1.0.0",
-  "description": "Academic writing assistant for DBA coursework: essays, discussion posts, peer replies. APA 7, multi-course, multi-variant, with strict verification before any draft is shown.",
+  "version": "2.0.0",
+  "description": "Academic writing assistant for DBA coursework: APA 7 papers (.docx), discussion posts, and replies to classmates. Works from what you provide in the chat, and checks every output before and after the humanizer.",
   "author": {
     "name": "Yashwanth"
   },

@@ -75,6 +75,6 @@ Student paper format only (not professional manuscript).
 
 ## Punctuation constraint
 
-Per the voice profile, no output from this plugin may contain an em dash
+No output from this plugin may contain an em dash
 (U+2014) or an en dash (U+2013). Use a colon, a period, or a restructured
 sentence instead. This applies to body text, title pages, and references.

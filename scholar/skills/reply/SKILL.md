@@ -1,130 +1,81 @@
 ---
 name: reply
 description: >
-  Write peer replies for discussion posts. 100 to 130 words each, engaging the
-  classmate's specific argument with a source and a closing question. Multiple
-  distinct reply sets. Never shows a reply that has not passed the verifier.
-allowed-tools: Agent, Task, Skill, Bash, Write, Read, Glob, Grep
+  Write replies to classmates' discussion posts. "Write me N replies" gives
+  exactly N replies, each to a different student, opening with the
+  student's full name, professional and specific to that student's points.
+  Every reply is verified before and after the humanizer. Use when the user
+  pastes classmates' posts and asks for replies or responses.
+allowed-tools: Agent, Task, Skill, Read, Glob, Grep
 ---
 
-# Write peer replies
+# Write replies to classmates
 
 **Do not show the user any reply until the verifier agent has returned
-`RESULT: PASS` for it twice: once before the humanizer (Gate 1, step 6)
-and once after it (Gate 2, step 8).** No previews, no "here is a first
-pass while I check." The only exceptions are the cap rules in
-`shared/verification-protocol.md`, which either attach a warning header or
-fall back to the Gate 1 text.
+`RESULT: PASS` for it twice: once before the humanizer (Gate 1) and once
+after it (Gate 2).** The only exceptions are the cap rules in
+`shared/verification-protocol.md`.
 
 ## 1. Read the reference files
 
-- `${CLAUDE_PLUGIN_ROOT}/shared/voice-profile.md`
 - `${CLAUDE_PLUGIN_ROOT}/shared/apa7-rules.md`
 - `${CLAUDE_PLUGIN_ROOT}/shared/verification-protocol.md`
 
-If a path does not resolve, Glob for `**/shared/voice-profile.md`.
+If a path does not resolve, Glob for `**/shared/verification-protocol.md`.
 
-## 2. Identify the course
+## 2. Collect the inputs from the chat
 
-Data root is `${CLAUDE_PROJECT_DIR}/scholar-data/`. If it does not exist,
-create it with `courses.md` from `${CLAUDE_PLUGIN_ROOT}/templates/courses.md`.
-One active course: use it. Several: ask. None: run `setup-course` inline.
+- **Student posts:** pasted by the user. If none are in the chat, ask.
+- **Number of replies (N):** from the request, for example "write me 2
+  replies". If the user did not say, ask.
+- **Reply instructions:** anything the professor said about replies, such
+  as a length, a citation, or a question. Look in the discussion prompt if
+  it is in the chat.
+- **Materials:** the readings in the chat, only needed if the instructions
+  require citations.
 
-## 3. Load context
+## 3. Pick the posts
 
-Read `{course}/feedback.md`. Every entry is a hard constraint.
+N replies means N different students, one reply each.
 
-Read `{course}/knowledge.md` for sources you can cite. Replies need a real
-source, and the unit readings are where it comes from.
+- If exactly N posts were pasted, reply to each.
+- If more than N were pasted, pick the N posts with the most substance to
+  respond to: a clear argument, a specific example, or a claim worth
+  extending. Skip posts that are too short or vague to engage.
+- If fewer than N were pasted, say so and ask for more posts.
 
-## 4. Get the classmate posts
+Each student's full name must come from their post. If a post shows no
+name, ask the user for it rather than guessing.
 
-The user pastes one or more classmate posts. If they have not, ask for them.
+## 4. Draft each reply
 
-Ask how many distinct reply sets they want, if they did not say. A set contains
-one reply per classmate post.
+- **First line:** the student's full name followed by a comma, for
+  example `Sarah Johnson,`
+- Engage that student's specific points: name the claim they made and
+  respond to it. Add value: an insight, example, implication, or a
+  different angle. Do not only agree or repeat their post.
+- Professional, natural tone. No sycophantic opener ("Great post!").
+- Length: the professor's reply length if stated; otherwise 100 to 130
+  words, not counting the name line.
+- No citations and no closing question unless the professor's reply
+  instructions require them. If citations are required, cite only the
+  provided materials, in APA 7.
+- No em dashes and no en dashes.
+- Each reply must differ from the others in opening, structure, and
+  wording, not only in the student it names.
 
-## 5. Draft each reply
+## 5. Verify, humanize, verify
 
-Per reply, 100 to 130 words. Count it.
+Follow `shared/verification-protocol.md` exactly, with output type `reply`.
+For each reply, send the student's post and any reply instructions as the
+prompt, the words "no rubric", the materials if the reply cites any, and
+the replies already finished. Gate 1, then the humanizer, then Gate 2.
 
-Every reply must:
+Do not mention the humanizer, except when a cap rule or an unavailable
+humanizer requires it.
 
-- Engage that classmate's **specific** argument. Name the actual claim they
-  made. Generic praise that would fit any post is a failure of this step.
-- Reference at least one real source, from the unit readings or clearly
-  relevant prior knowledge, cited in APA 7.
-- End with a genuine question that advances the discussion. Not rhetorical,
-  and not something their post already answered.
+## 6. Output
 
-Across sets, do not repeat the same opening, the same source, or the same
-question. Each set takes a different angle on the classmate's points.
-
-Voice profile applies. No em dashes, no en dashes. No sycophantic opener
-("Great post!"). Do not invent a source, a statistic, or a quotation from the
-classmate's post.
-
-## 6. Gate 1: verify each reply. Hard gate.
-
-Follow `shared/verification-protocol.md` exactly. For each reply, delegate
-to the `scholar:verifier` agent with the reply, the classmate's post as the prompt context, the
-rubric if the user supplied one, and output type
-`reply`. On FAIL, fix every listed issue and resubmit. Log each attempt:
-
-    v{N} gate1 attempt {i}: RESULT: <PASS|FAIL>
-
-If the user supplied no rubric, pass the words "no rubric supplied" as the
-rubric input, at both gates. The verifier then skips CHECK 2 and runs
-checks 1, 3, and 4.
-
-Self-assessment is not verification. Only an Agent (Task) call to the
-`scholar:verifier` agent returning `RESULT: PASS` satisfies this step.
-
-On PASS, keep an exact copy of the text. It is the verified fallback if
-Gate 2 cannot pass. Cap at 5 attempts; at the cap, follow the protocol's
-Gate 1 cap rule and skip steps 7 and 8.
-
-## 7. Humanizer pass. Invisible.
-
-Only after Gate 1 passes. Invoke the `humanizer:humanizer` skill in
-**embedded mode**, which returns only the final text. Pass these
-constraints with the text:
-
-- Em dashes and en dashes are banned outright. The voice profile is the
-  governing writing sample and it forbids them. Do not preserve them.
-- Do not add or remove any citation, author name, year, page number, or DOI.
-- Keep every point that answers the prompt and every point that meets a
-  rubric criterion. Change how things are said, not what is said.
-
-Then run the protocol's scan: zero U+2014, zero U+2013, every citation
-identical to the Gate 1 text, and word count still inside 100 to 130. The window is
-narrow, so re-count and fix any drift.
-
-If the `humanizer:humanizer` skill is unavailable, apply the voice profile's
-"What to avoid" list yourself, tell the user the humanizer pass was
-skipped, and still run step 8.
-
-## 8. Gate 2: verify again after the humanizer. Hard gate.
-
-The humanizer rewrote the text, so Gate 1's PASS no longer covers it. Send
-the humanized text to the `scholar:verifier` agent with the same inputs as
-step 6. Log each attempt:
-
-    v{N} gate2 attempt {i}: RESULT: <PASS|FAIL>
-
-On FAIL, make the smallest edits that fix every listed issue and keep the
-humanized wording everywhere else. Do not run the humanizer again. Cap at 3
-attempts; at the cap, follow the protocol's Gate 2 cap rule and output the
-Gate 1 fallback instead.
-
-Do not show a before and after. Do not mention the humanizer, except when
-a cap rule or an unavailable humanizer requires it.
-
-The dash ban covers everything you print, not only the body text. Labels,
-headers, word counts, and any commentary around the output must also be
-free of em and en dashes. Use a colon or a period instead.
-
-## 9. Output
-
-Print the replies as formatted text in the chat, grouped by set and labeled
-with which classmate post each answers. State each word count.
+Print exactly N replies as separate copy-and-paste blocks. Above each,
+state which student it answers and its word count. If you picked from more
+posts than N, say which students you chose.

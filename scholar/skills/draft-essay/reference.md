@@ -11,12 +11,11 @@
       --date "September 20, 2026" \
       --body "<path to body file>" \
       --references "<path to references file>" \
-      --output "<course>_<assignment>_v<N>.docx"
+      --output "<assignment>_<last-name>_v<N>.docx"
 
 Use `python`, not `python3` and not `py`. On Windows `python3` is often a
 Microsoft Store stub that is not a working interpreter, and `py` may resolve
-to a different installation than the one the SessionStart hook installed
-python-docx into.
+to a different installation than the one that has python-docx.
 
 All flags except `--references` are required.
 
