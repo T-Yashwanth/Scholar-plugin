@@ -29,8 +29,20 @@ Everything comes from this chat: earlier messages, pasted text, and uploaded
 files all count.
 
 - **Prompt:** the discussion question and every professor instruction.
-- **Rubric:** required. If none is in the chat, ask for it and wait. Do not
-  draft without it.
+- **Rubric:** use the rubric for this assignment if it is in the chat. A
+  rubric from an earlier assignment in the chat does not count. If there is
+  none, do not draft yet. Ask, in the same message as anything else that is
+  missing:
+
+  > I don't see a rubric for this assignment. Did you forget to add it, or
+  > do you want to skip it? If you have one, please paste it here.
+
+  Then wait for the answer.
+  - **Rubric pasted:** use it.
+  - **User says skip:** continue without one. Send the verifier the words
+    "skipped by the user" as the rubric, and say in one line with the output
+    that it was written without a rubric, at the user's request.
+  - **Unclear answer:** ask again. Never decide to skip on your own.
 - **Materials:** readings, transcripts, documents, and links for this
   assignment.
 - **Version count:** write exactly the number the user asked for. If they
@@ -62,9 +74,10 @@ Internal, not shown:
 
 ## 5. Verify, humanize, verify
 
-Follow `shared/verification-protocol.md` exactly, with output type `post`.
-Send the prompt, the rubric, the source materials, and the other finished
-versions. Gate 1, then the humanizer, then Gate 2.
+Write every version first, then follow `shared/verification-protocol.md`
+exactly, with output type `post`. All versions go to the verifier together
+in one call per round, each labeled. Gate 1, then one humanizer pass over
+all passed versions, then the citation compare, then Gate 2.
 
 Do not show a before and after. Do not mention the humanizer, except when a
 cap rule or an unavailable humanizer requires it.

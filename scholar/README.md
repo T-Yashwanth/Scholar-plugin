@@ -40,9 +40,10 @@ Then reload Claude. To get a newer version later:
 | `draft-essay` | Skill | Writes papers and makes the Word files |
 | `draft-post` | Skill | Writes discussion posts |
 | `reply` | Skill | Writes replies to classmates |
-| `verifier` | Agent | Checks one draft and answers PASS or FAIL. Never edits. |
+| `verifier` | Agent | Checks all versions in one call and answers PASS or FAIL for each. Never edits. |
 | `generate-docx.py` | Script | Turns a finished paper into an APA 7 Word file |
-| `apa7-rules.md` | Rules | APA 7 summary with sources and reference examples |
+| `apa7-rules.md` | Rules | Full APA 7 reference with sources, used when writing |
+| `apa7-checklist.md` | Rules | Short APA 7 checklist the verifier checks against |
 | `verification-protocol.md` | Rules | The check, humanize, check order |
 
 A **skill** is a set of step-by-step instructions Claude follows. An
@@ -66,28 +67,33 @@ Once a skill runs, it does every step below by itself:
    from the chat. Asks only for what is missing, in one message.
 2. **Plan.** Lists every question, sub-question, instruction, and rubric
    criterion as a checklist. Works out the required length.
-3. **Write.** Drafts each version. From the second version on, it reads the
-   earlier versions first so the new one is clearly different.
-4. **Check 1.** Calls the `verifier` agent. Up to 5 attempts, fixing
-   everything it reports each time.
-5. **Humanize.** Calls the `humanizer` skill to make the text read
-   naturally, without touching citations or dropping any point.
-6. **Check 2.** Calls the `verifier` agent again on the humanized text. Up
-   to 3 attempts, with small fixes only.
-7. **Deliver.** Word files for papers (full paths shown), text for posts and
+3. **Write.** Drafts every version. From the second version on, it reads
+   the earlier versions first so the new one is clearly different.
+4. **Check 1.** Sends all versions to the `verifier` agent in one call,
+   with your readings. It lists every problem in every version at once.
+   Only the versions that failed are fixed and sent back. Up to 5 rounds.
+5. **Humanize.** Calls the `humanizer` skill once for all versions, to make
+   the text read naturally without touching citations or dropping any point.
+6. **Compare.** Confirms every citation and reference is exactly the same as
+   in Check 1, and puts back anything the humanizer changed.
+7. **Check 2.** Sends all humanized versions to the `verifier` again in one
+   call. The readings are not resent, because step 6 proved the citations
+   did not change. Up to 3 rounds, with small fixes only.
+8. **Deliver.** Word files for papers (full paths shown), text for posts and
    replies. Exactly the number you asked for.
 
-The verifier runs four checks each time:
+The verifier runs all four checks on every version, every time:
 
 1. Every part of the question answered and every instruction followed.
-2. Every rubric criterion at its highest level (skipped for replies).
+2. Every rubric criterion at its highest level (skipped only if you chose
+   to skip the rubric).
 3. APA 7 citations and references correct, and every source found in the
    materials you gave in the chat.
 4. Length, format, and title page right, and not a copy of another version.
 
-If Check 1 still fails after 5 attempts, you get the draft with a warning
-listing what is wrong. If Check 2 still fails after 3, you get the Check 1
-version, which passed every check, marked as not humanized.
+If a version still fails Check 1 after 5 rounds, you get the draft with a
+warning listing what is wrong. If it still fails Check 2 after 3, you get
+the Check 1 version, which passed every check, marked as not humanized.
 
 ## Calling skills and agents yourself
 
@@ -110,8 +116,9 @@ ask:
 
     Use the scholar:verifier agent to check this post.
 
-Give it the same things the skills do: the text, the prompt, the rubric (not
-for replies), the readings it cites, and the type: essay, post, or reply.
+Give it the same things the skills do: the text, the prompt, the rubric (or
+say you are skipping it), the readings it cites, and the type: essay, post,
+or reply.
 It returns PASS or FAIL with a list of fixes. It does not rewrite anything.
 
 **The humanizer on its own.** It comes from the humanizer plugin:
@@ -125,8 +132,10 @@ yourself is not checked again unless you then ask for the verifier.
 
 - **Every part answered.** Each question, sub-question, and professor
   instruction is a checklist item.
-- **Rubric.** Required for papers and posts. Every criterion must be met at
-  its highest level.
+- **Rubric.** Every criterion must be met at its highest level. If an
+  assignment has no rubric in the chat, Claude asks whether you forgot it or
+  want to skip it, and waits. It uses the rubric you paste, or skips the
+  rubric check only if you say so. It never skips on its own.
 - **Length.** The professor's word count. Defaults only when the prompt
   gives none: posts 250 to 350 words, replies 100 to 130.
 - **Sources.** Only the materials you provided in the chat. Nothing is
@@ -150,6 +159,10 @@ yourself is not checked again unless you then ask for the verifier.
 - The checks are instructions Claude follows, not code that forces them.
 - Chats keep your materials, but very long chats get summarized. Paste key
   feedback or instructions again if a chat has run for a long time.
+- Every message in a chat re-reads the whole chat, including old readings.
+  When a subject's chat has several assignments in it, start a fresh chat
+  for the next one with only that assignment's prompt, rubric, readings,
+  and any feedback you want applied. It is faster and uses fewer tokens.
 
 ## Files
 
@@ -158,7 +171,8 @@ yourself is not checked again unless you then ask for the verifier.
     ├── agents/verifier.md               the checker
     ├── scripts/generate-docx.py         APA 7 Word file writer
     ├── shared/
-    │   ├── apa7-rules.md                APA summary, sources, examples
+    │   ├── apa7-rules.md                full APA reference, sources, examples
+    │   ├── apa7-checklist.md            short APA checklist for the verifier
     │   └── verification-protocol.md     the check, humanize, check order
     └── skills/
         ├── draft-essay/{SKILL.md,reference.md}

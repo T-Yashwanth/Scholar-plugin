@@ -11,7 +11,7 @@
       --date "September 20, 2026" \
       --body "<path to body file>" \
       --references "<path to references file>" \
-      --output "<assignment>_<last-name>_v<N>.docx"
+      --output "<file name from SKILL.md step 6>.docx"
 
 Use `python`, not `python3` and not `py`. On Windows `python3` is often a
 Microsoft Store stub that is not a working interpreter, and `py` may resolve

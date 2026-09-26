@@ -10,7 +10,7 @@
     {
       "name": "scholar",
       "description": "Drafts APA 7 papers (.docx), discussion posts, and replies to classmates from what you provide in the chat. Every output is checked for completeness, rubric, and APA before and after the humanizer.",
-      "version": "2.1.0",
+      "version": "2.2.0",
       "author": {
         "name": "Yashwanth"
       },

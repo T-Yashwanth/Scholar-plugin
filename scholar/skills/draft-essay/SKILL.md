@@ -31,8 +31,20 @@ Everything comes from this chat: earlier messages, pasted text, and uploaded
 files all count.
 
 - **Prompt:** the assignment question and every professor instruction.
-- **Rubric:** required. If none is in the chat, ask for it and wait. Do not
-  draft without it.
+- **Rubric:** use the rubric for this assignment if it is in the chat. A
+  rubric from an earlier assignment in the chat does not count. If there is
+  none, do not draft yet. Ask, in the same message as anything else that is
+  missing:
+
+  > I don't see a rubric for this assignment. Did you forget to add it, or
+  > do you want to skip it? If you have one, please paste it here.
+
+  Then wait for the answer.
+  - **Rubric pasted:** use it.
+  - **User says skip:** continue without one. Send the verifier the words
+    "skipped by the user" as the rubric, and say in one line with the output
+    that it was written without a rubric, at the user's request.
+  - **Unclear answer:** ask again. Never decide to skip on your own.
 - **Materials:** readings, transcripts, documents, and links for this
   assignment.
 - **Variant count:** write exactly the number the user asked for. If they
@@ -75,10 +87,11 @@ Internal, not shown:
 
 ## 5. Verify, humanize, verify
 
-Follow `shared/verification-protocol.md` exactly, with output type `essay`.
-Send the prompt, the rubric, the source materials, this variant's title
-page details, and the other finished variants. Gate 1, then the humanizer,
-then Gate 2.
+Write every variant first, then follow `shared/verification-protocol.md`
+exactly, with output type `essay`. All variants go to the verifier together
+in one call per round, each labeled and with its own title page details.
+Gate 1, then one humanizer pass over all passed variants, then the citation
+compare, then Gate 2.
 
 Do not show a before and after. Do not mention the humanizer, except when a
 cap rule or an unavailable humanizer requires it.
@@ -88,10 +101,15 @@ cap rule or an unavailable humanizer requires it.
 Follow [reference.md](reference.md) for the command, the file formats, and
 the failure handling.
 
-One file per variant, named `{assignment-short-name}_{last-name}_v{N}.docx`,
-saved in the current working folder. `--author`, `--school`, `--course`, and
-`--instructor` come from that variant's title page details, verbatim.
-`--title` and `--date` are the same for every variant.
+One file per variant, named
+`{writingassignment}_{assignment-short-name}_{last-name}.docx`, saved in the
+current working folder. When two or more variants share a last name (for
+example, every variant uses one person's details), add the variant number so
+no file overwrites another: `{writingassignment}_{assignment-short-name}_{last-name}_v{N}.docx`.
+
+`--author`, `--school`, `--course`, and `--instructor` come from that
+variant's title page details, verbatim. `--title` and `--date` are the same
+for every variant.
 
 Report the full path of each file and which person it belongs to. Exactly
 the number of variants requested.
