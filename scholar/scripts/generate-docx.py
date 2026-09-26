@@ -7,7 +7,8 @@ Usage:
       --body body.md [--references refs.txt] --output out.docx
 
 Body file: plain text or light markdown. Blank lines separate paragraphs.
-Leading '#', '##', '###' become APA heading levels 1, 2, 3.
+Leading '#' to '#####' become APA heading levels 1 to 5. '*text*' is
+italic and '**text**' is bold.
 References file: one entry per line (blank lines ignored).
 
 Exits non-zero with a clear message if python-docx is missing, so the caller
@@ -16,6 +17,7 @@ can fall back to markdown rather than losing the drafted content.
 
 import argparse
 import os
+import re
 import sys
 
 try:
@@ -95,6 +97,27 @@ def add_para(doc, text, indent=True, align=None, bold=False, italic=False):
     return para
 
 
+# **text** marks bold and *text* marks italics (journal names, volumes, and
+# book titles in APA). A marker must touch its text on both sides, so a lone
+# asterisk, as in "5 * 3", stays literal.
+MARKUP = re.compile(r"\*\*(?!\s)(.+?)(?<!\s)\*\*|\*(?!\s)([^*]+?)(?<!\s)\*")
+
+
+def add_rich_runs(para, text):
+    """Add text to para, turning **spans** bold and *spans* italic."""
+    pos = 0
+    for m in MARKUP.finditer(text):
+        if m.start() > pos:
+            para.add_run(text[pos:m.start()])
+        if m.group(1) is not None:
+            para.add_run(m.group(1)).bold = True
+        else:
+            para.add_run(m.group(2)).italic = True
+        pos = m.end()
+    if pos < len(text):
+        para.add_run(text[pos:])
+
+
 def build_title_page(doc, args):
     """APA 7 student title page: centered, upper half, no running head."""
     center = WD_ALIGN_PARAGRAPH.CENTER
@@ -112,6 +135,23 @@ def page_break(doc):
     doc.add_paragraph().add_run().add_break(WD_BREAK.PAGE)
 
 
+def add_run_in(doc, heading, text):
+    """APA level 4 or 5 heading, run in to the start of its paragraph.
+
+    heading is (words, level5). Level 4 is bold, level 5 bold italic. Both
+    are indented and end with a period. With text None, the heading stands
+    alone, which only happens when no paragraph follows it.
+    """
+    words, level5 = heading
+    para = doc.add_paragraph()
+    para.paragraph_format.first_line_indent = Inches(0.5)
+    run = para.add_run(words if text is None else words + " ")
+    run.bold = True
+    run.italic = level5
+    if text is not None:
+        add_rich_runs(para, " ".join(text.split()))
+
+
 def add_body(doc, path):
     with open(path, encoding="utf-8") as fh:
         raw = fh.read()
@@ -119,11 +159,31 @@ def add_body(doc, path):
     # One add_paragraph per paragraph. A newline inside add_paragraph does
     # NOT start a new paragraph, so indent and line spacing would silently
     # fail for everything after the first line.
+    #
+    # APA levels 4 and 5 are run-in headings: the paragraph continues on the
+    # heading's line. A #### or ##### block is held in `pending` until the
+    # next paragraph arrives, then both are written as one paragraph.
+    pending = None
     for block in raw.split("\n\n"):
         block = block.strip()
         if not block:
             continue
-        if block.startswith("### "):
+        if pending is not None and block.startswith("#"):
+            add_run_in(doc, pending, None)
+            pending = None
+        if block.startswith("##### ") or block.startswith("#### "):
+            head, _, rest = block.partition("\n")
+            words = head.lstrip("#").strip()
+            if not words.endswith("."):
+                words += "."
+            pending = (words, block.startswith("##### "))
+            if rest.strip():
+                add_run_in(doc, pending, rest)
+                pending = None
+        elif pending is not None:
+            add_run_in(doc, pending, block)
+            pending = None
+        elif block.startswith("### "):
             add_para(doc, block[4:].strip(), indent=False,
                      bold=True, italic=True)
         elif block.startswith("## "):
@@ -132,7 +192,11 @@ def add_body(doc, path):
             add_para(doc, block[2:].strip(), indent=False,
                      align=WD_ALIGN_PARAGRAPH.CENTER, bold=True)
         else:
-            add_para(doc, " ".join(block.split()), indent=True)
+            para = doc.add_paragraph()
+            para.paragraph_format.first_line_indent = Inches(0.5)
+            add_rich_runs(para, " ".join(block.split()))
+    if pending is not None:
+        add_run_in(doc, pending, None)
 
 
 def add_references(doc, path):
@@ -149,7 +213,7 @@ def add_references(doc, path):
         # Hanging indent: text block in 0.5", first line pulled back out.
         pf.left_indent = Inches(0.5)
         pf.first_line_indent = Inches(-0.5)
-        para.add_run(entry)
+        add_rich_runs(para, entry)
 
 
 def main():
@@ -181,6 +245,9 @@ def main():
 
     build_title_page(doc, args)
     page_break(doc)
+    # APA 7 repeats the title, centered and bold, at the top of page 2.
+    add_para(doc, args.title, indent=False,
+             align=WD_ALIGN_PARAGRAPH.CENTER, bold=True)
     add_body(doc, args.body)
     if args.references:
         add_references(doc, args.references)

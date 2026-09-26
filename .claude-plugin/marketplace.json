@@ -1,5 +1,5 @@
 {
-  "$schema": "ht/tps://anthropic.com/claude-code/marketplace.schema.json",
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "scholar-plugin",
   "description": "Scholar-plugin marketplace: the Scholar APA 7 academic writing assistant for DBA coursework",
   "owner": {
@@ -10,7 +10,7 @@
     {
       "name": "scholar",
       "description": "Drafts APA 7 papers (.docx), discussion posts, and replies to classmates from what you provide in the chat. Every output is checked for completeness, rubric, and APA before and after the humanizer.",
-      "version": "2.0.0",
+      "version": "2.1.0",
       "author": {
         "name": "Yashwanth"
       },

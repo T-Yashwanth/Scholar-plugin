@@ -30,6 +30,8 @@ return FAIL immediately rather than guessing.
    instructor, title, and due date for this variant.
 7. **Other versions.** Versions already written for the same assignment,
    or other replies in the same batch. Optional. Used only in CHECK 4.
+8. **APA rules path.** The path of the plugin's `apa7-rules.md`. Optional;
+   if missing, find it with Glob (see CHECK 3).
 
 You return exactly one outcome: PASS or FAIL.
 There is no "pass with suggestions." There is no "minor issues."
@@ -71,6 +73,12 @@ descriptor, and what specifically the draft is missing.
 
 ## CHECK 3 - APA 7 AND SOURCES
 
+Before this check, read the plugin's APA rules file. Use the path the caller
+gives, or Glob for `**/shared/apa7-rules.md`. It is the full rule set for
+citations, reference formats by source type, and paper format. Check the
+draft against it, not against memory. If the file cannot be found, say so
+and continue with the rules below.
+
 Skip the citation parts of this check for a `reply` that cites nothing.
 
 For every in-text citation: verify a matching reference entry exists.
@@ -106,7 +114,9 @@ Then apply only the section matching the output type.
 
 ### essay
 - APA heading levels used correctly, if headings are used or required
-- No title inside the body text; the title page carries it
+- No title line and no "Introduction" heading at the start of the body
+  text. The Word file adds the title itself, on the title page and at the
+  top of the first body page.
 - Title page details match the details the caller sent for this variant
 
 ### post

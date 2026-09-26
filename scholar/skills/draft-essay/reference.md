@@ -28,14 +28,28 @@ Plain text or light markdown. Write it to a scratch path, not the project root.
 - `# Heading` becomes APA Level 1 (centered, bold).
 - `## Heading` becomes APA Level 2 (left, bold).
 - `### Heading` becomes APA Level 3 (left, bold italic).
+- `#### Heading` becomes APA Level 4 (indented, bold, ends with a period).
+  The next paragraph continues on the same line, as APA requires.
+- `##### Heading` becomes APA Level 5 (indented, bold italic, ends with a
+  period), run in the same way.
+- `**text**` becomes bold. Rarely needed in APA body text.
+- `*text*` becomes italic. Use it for titles of books, reports, and other
+  standalone works named in the text.
 - Omit headings entirely unless the assignment calls for them.
-- Do not put the title in the body. The title page already has it.
+- Do not put the title in the body file. The script prints it on the title
+  page and again, centered and bold, at the top of the first body page, as
+  APA 7 requires. Do not add an "Introduction" heading.
 
 ## References file format
 
 One entry per line. Blank lines are ignored. Entries must already be in APA 7
 order and format, since the script applies the hanging indent but does not
 reorder or reformat them.
+
+Mark every part APA requires in italics with `*...*`: journal name and
+volume, book title, report title, webpage title, video title. For example:
+
+    Smith, J. (2020). Leading change. *Journal of Management, 12*(3), 45-60. https://doi.org/10.1000/xyz
 
 ## What the script guarantees
 

@@ -32,6 +32,8 @@ Delegate to the `scholar:verifier` agent with:
 - **Title page details:** essays only, for this variant
 - **Other versions:** the current text of every version or reply already
   finished for this request, if any
+- **APA rules path:** the full path of `shared/apa7-rules.md`, so the
+  verifier checks against the same rules the draft was written to
 
 Pass the identical inputs at both gates. The reply ends in `RESULT: PASS` or
 `RESULT: FAIL`.
