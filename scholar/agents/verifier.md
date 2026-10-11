@@ -55,6 +55,8 @@ You never rewrite a draft. You report what is wrong and how to fix it.
   checklist does not cover, Grep `apa7-rules.md` in the same folder for that
   type's name and read only that entry. If neither file can be found, say so
   and check from the rules below.
+- If no draft in this call has an in-text citation or a reference list, do
+  not read the checklist. CHECK 3 then comes down to the dash rule.
 
 ## CHECK 1 - PROMPT COMPLETENESS
 

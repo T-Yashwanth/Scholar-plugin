@@ -18,8 +18,10 @@ after it (Gate 2).** The only exceptions are the cap rules in
 
 ## 1. Read the reference files
 
-- `${CLAUDE_PLUGIN_ROOT}/shared/apa7-rules.md`
 - `${CLAUDE_PLUGIN_ROOT}/shared/verification-protocol.md`
+- `${CLAUDE_PLUGIN_ROOT}/shared/apa7-rules.md`, only if the professor's
+  reply instructions require citations. Most replies cite nothing, so check
+  the instructions in step 2 first and read this file only when they do.
 
 If a path does not resolve, Glob for `**/shared/verification-protocol.md`.
 
