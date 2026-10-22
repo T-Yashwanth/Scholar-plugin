@@ -1,0 +1,6 @@
+{
+  "name": "scholar",
+  "version": "2.2.0",
+  "description": "Academic writing assistant for DBA coursework: APA 7 papers (.docx), discussion posts, and replies to classmates. Works from what you provide in the chat, and checks every output before and after the humanizer.",
+  "skills": "./skills/"
+}
